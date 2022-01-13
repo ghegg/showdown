@@ -3,6 +3,7 @@ import json
 from copy import deepcopy
 
 from environs import Env
+import sys, getopt
 
 import constants
 import config
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def parse_configs():
     env = Env()
-    env.read_env()
+    env.read_env(constants.ENVIRONMENT, recurse=False)
 
     config.battle_bot_module = env("BATTLE_BOT", 'safest')
     config.save_replay = env.bool("SAVE_REPLAY", config.save_replay)
@@ -109,4 +110,13 @@ async def showdown():
 
 
 if __name__ == "__main__":
+    argv = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(argv,"e:",["env="])
+    except getopt.GetoptError:
+        print('run.py -e <env>' )
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-e", "--env"):
+            constants.ENVIRONMENT = f".env.{arg}"
     asyncio.get_event_loop().run_until_complete(showdown())
